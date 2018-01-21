@@ -18,7 +18,7 @@ command /iEssentials [<text>] [<integer>]:
     trigger:
         if arg 1 is "help":
             if arg 2 isn't set:
-                message "&6&liEssentials &fHelp &b(1/1)"
+                message "&6&liEssentials &fHelp &b(1/5)"
                 message "   "
                 message "/eco give <player> <amount>"
                 message "/eco take <player> <amount>"
@@ -29,7 +29,7 @@ command /iEssentials [<text>] [<integer>]:
                 message "/getpos [player]"
                 message "/tp <player>"
             if arg 2 is 1:
-                message "&6&liEssentials &fHelp &b(1/2)"
+                message "&6&liEssentials &fHelp &b(1/5)"
                 message "   "
                 message "/eco give <player> <amount>"
                 message "/eco take <player> <amount>"
@@ -40,7 +40,7 @@ command /iEssentials [<text>] [<integer>]:
                 message "/getpos [player]"
                 message "/tp <player>"
             if arg 2 is 2:
-                message "&6&liEssentials &fHelp &b(2/2)"
+                message "&6&liEssentials &fHelp &b(2/5)"
                 message "   "
                 message "/tphere <player>"
                 message "/tpall"
@@ -51,8 +51,39 @@ command /iEssentials [<text>] [<integer>]:
                 message "/feed [player]"
                 message "/vanish [player]"
             if arg 2 is 3:   
+                message "&6&liEssentials &fHelp &b(3/5)"
+                message "   "
                 message "/ban <player>"
                 message "/mute <player>"
+                message "/freeze <player>"
+                message "/kick <player>"
+                message "/unban <player>"
+                message "/broadcast <message>"
+                message "/gamemode <type> [player]"
+                message "/skull <player>"
+            if arg 2 is 4:
+                message "&6&liEssentials &fHelp &b(4/5)"
+                message "   "
+                message "/block-word <word>"
+                message "/unblock-word <word>"
+                message "/clearchat"
+                message "/mutechat"
+                message "/banip <username>"
+                message "/unbanip <username>"
+                message "/msg <username> <message>"
+                message "/reply <message>"
+                message "/helpop <message>"
+                message "/afk"
+            if arg 2 is 5:
+                message "&6&liEssentials &fHelp &b(5/5)"
+                message "   "
+                message "/warp <warp name>"
+                message "/setwarp <warp name>"
+                message "/delwarp <warp name>"
+                message "/warps"
+                message "/mail <send|read|clear> [player] [message]"
+                message "/setspawn"
+                message "/spawn"
         if arg 1 isn't set:
             message "&8------------------- &6&liEssentials &8-------------------"
             message "&f   "
@@ -391,7 +422,7 @@ command /gmsp [<player>]:
             else: 
                 message "{@no-permission-message}"  
 command /skull <offlineplayer>:
-    permission: iModerate.skull
+    permission: iEssentials.skull
     permission message: {@no-permission-message}
     trigger:
         give player skull of argument        
@@ -617,6 +648,8 @@ command /spawn:
         else:
             if player is op:
                 message "&eNo spawn! Please set the spawn with &f/setspawn&e!"
+            else if player has permission "iEssentials.setspawn":
+                message "&eNo spawn! Please set the spawn with &f/setspawn&e!"            
             else:
                 message "&ePlease tell an administrator to set the spawn."
 
