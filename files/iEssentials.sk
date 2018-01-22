@@ -10,7 +10,6 @@ options:
 #Code (Editing may mess up the project, not considered)
 
 #iEssentials
-
 command /iEssentials [<text>] [<integer>]:
     usage: /iEssentials
     permission: iEssentials.help
@@ -607,7 +606,7 @@ command /delwarp <text>:
             clear {iEssentials::warpn::%argument%}
             message "&eWarp Deleted!"
 command /warps:
-    permission: iBasics.warps
+    permission: iEssentials.warps
     permission message: {@no-permission-message}
     trigger:
         message "&5&lWarps&f: %{iEssentials::warpn::*}%"
@@ -628,7 +627,31 @@ command /mail [<text>] [<player>] [<text>]:
             if arg 2 is set:
                 if arg 3 is set:
                     if player has permission "iEssentials.mail.send":
-                        add "&f[%player%] %argument 3%" to {iEssentials::mail::%argument 2's uuid%::*}
+                        if {iEssentials::mailtoggle::%argument 2's uuid%} is false:
+                            add "&f[%player%] %argument 3%" to {iEssentials::mail::%argument 2's uuid%::*}
+                            message "&6You have sent &f%argument 3% &6to &f%argument 2%&6's mailbox!"
+                        else:                        
+                            message "&6This player has mail disabled, meaning you cannot send them mail!"
+command /mailtoggle:
+    permission: iEssentials.mailtoggle
+    permission message: {@no-permission-message}
+    trigger:
+        if {iEssentials::mailtoggle::%player's uuid%} is true:
+            set {iEssentials::mailtoggle::%player's uuid%} to false
+            message "&6You have enabled mail! Players can send you mail now!"
+        else:
+            set {iEssentials::mailtoggle::%player's uuid%} to true
+            message "&6You have disabled mail! Players cannot send you mail now!"
+command /commandspy:
+    permission: iEssentials.commandspy
+    permission message: {@no-permission-message}
+    trigger:
+        if {iEssentials::commandspy::%player's uuid%} is true:
+            set {iEssentials::commandspy::%player's uuid%} to false
+            message "&6You have disabled command spy!"
+        else:
+            set {iEssentials::commandspy::%player's uuid%} to true
+            message "&6You have enabled command spy!"
 
 #iEssentials Spawn System
 
@@ -697,3 +720,11 @@ on first join:
 on join:
     if {iEssentials::eco::users::%player's uuid%} isn't set:
         set {iEssentials::eco::users::%player's uuid%} to {@starting-balance}   
+on command:
+    loop all players:
+        if {iEssentials::commandspy::%loop-player's uuid%} is true:
+            if player isn't loop-player:
+                if arguments isn't "<none>":
+                    send "&f[%player%] /%command% %arguments%" to loop-player
+                else:
+                    send "&f[%player%] /%command%" to loop-player
