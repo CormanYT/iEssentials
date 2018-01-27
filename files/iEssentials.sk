@@ -6,90 +6,21 @@ options:
   first-join-message-toggled : true
   first-join-message : &dWelcome &6%player% &dto the server
   starting-balance : 0
+  nickname-max-length : 30
 
 #Code (Editing may mess up the project, not considered)
 
 #iEssentials
-command /iEssentials [<text>] [<integer>]:
-    usage: /iEssentials
+command /iEssentials:
     permission: iEssentials.help
     permission message: {@no-permission-message}
     trigger:
-        if arg 1 is "help":
-            if arg 2 isn't set:
-                message "&6&liEssentials &fHelp &b(1/5)"
-                message "   "
-                message "/eco give <player> <amount>"
-                message "/eco take <player> <amount>"
-                message "/eco set <player> <amount>"
-                message "/eco reset <player> <amount>"
-                message "/pay <player> <amount>"
-                message "/balance [player]"
-                message "/getpos [player]"
-                message "/tp <player>"
-            if arg 2 is 1:
-                message "&6&liEssentials &fHelp &b(1/5)"
-                message "   "
-                message "/eco give <player> <amount>"
-                message "/eco take <player> <amount>"
-                message "/eco set <player> <amount>"
-                message "/eco reset <player> <amount>"
-                message "/pay <player> <amount>"
-                message "/balance [player]"
-                message "/getpos [player]"
-                message "/tp <player>"
-            if arg 2 is 2:
-                message "&6&liEssentials &fHelp &b(2/5)"
-                message "   "
-                message "/tphere <player>"
-                message "/tpall"
-                message "/god [player]"
-                message "/heal [player]"
-                message "/sudo <player> <command>"
-                message "/clear"
-                message "/feed [player]"
-                message "/vanish [player]"
-            if arg 2 is 3:   
-                message "&6&liEssentials &fHelp &b(3/5)"
-                message "   "
-                message "/ban <player>"
-                message "/mute <player>"
-                message "/freeze <player>"
-                message "/kick <player>"
-                message "/unban <player>"
-                message "/broadcast <message>"
-                message "/gamemode <type> [player]"
-                message "/skull <player>"
-            if arg 2 is 4:
-                message "&6&liEssentials &fHelp &b(4/5)"
-                message "   "
-                message "/block-word <word>"
-                message "/unblock-word <word>"
-                message "/clearchat"
-                message "/mutechat"
-                message "/banip <username>"
-                message "/unbanip <username>"
-                message "/msg <username> <message>"
-                message "/reply <message>"
-                message "/helpop <message>"
-                message "/afk"
-            if arg 2 is 5:
-                message "&6&liEssentials &fHelp &b(5/5)"
-                message "   "
-                message "/warp <warp name>"
-                message "/setwarp <warp name>"
-                message "/delwarp <warp name>"
-                message "/warps"
-                message "/mail <send|read|clear> [player] [message]"
-                message "/setspawn"
-                message "/spawn"
-        if arg 1 isn't set:
-            message "&8------------------- &6&liEssentials &8-------------------"
-            message "&f   "
-            message "&fWelcome to &6&liEssentials&f, a Skript server management system!"
-            message "&fThis plugin is great if you are running a server with mainly Skript."
-            message "&fAdministrate your server, use some nifty cheats too! Give player's money to their balance."
-            message "&fIf you need help with the commands do /iEssentials help. It's a list of iEssentials commands!"
+        message "&8------------------- &6&liEssentials &8-------------------"
+        message "&f   "
+        message "&fWelcome to &6&liEssentials&f, a Skript server management system!"
+        message "&fThis plugin is great if you are running a server with mainly Skript."
+        message "&fAdministrate your server, use some nifty cheats too! Give player's money to their balance."
+        message "&fIf you need help with the commands do /iEssentials help. It's a list of iEssentials commands!"
 
 #iEssentials Economy
 
@@ -102,7 +33,7 @@ command /eco [<text>] [<player>] [<number>]:
                     if arg 3 is set:
                         player has permission "iEssentials.eco.set":
                             set {iEssentials::eco::users::%arg 2's uuid%} to arg 3
-                            message "&a%argument 2%&e's balance has been set to:&a %arg 3%"   
+                            message "&c%argument 2%&6's balance has been set to:&c %arg 3%"   
                         player doesn't have permission "iMoney.set":
                             message "{@no-permission-message}"         
         if arg 1 is "give":
@@ -110,23 +41,23 @@ command /eco [<text>] [<player>] [<number>]:
                 if arg 2 isn't offline:
                     player has permission "iEssentials.eco.give":
                         increase {iEssentials::eco::users::%arg 2's uuid%} by arg 3
-                        message "&eYou have given &a%argument 3% &eto &a%argument 2%&e's balance!"    
+                        message "&6You have given &c%argument 3% &6to &a%argument 2%&6's balance!"    
         if arg 1 is "take":
             if arg 2 is set:
                 if arg 2 isn't offline:
                     if arg 3 is set:
                         player has permission "iEssentials.eco.take":
                             remove argument 3 from {iEssentials::eco::users::%argument 2's uuid%}
-                            message "&eYou have taken &a%argument 3% &efrom &a%argument 2%&e's balance!"
+                            message "&6You have taken &c%argument 3% &6from &c%argument 2%&6's balance!"
         if arg 1 is "reset":
             if arg 2 is set:
                 if arg 2 isn't offline:
                     player has permission "iEssentials.eco.reset":
                         set {iEssentials::eco::users::%argument 2's uuid%} to 0
-                        message "&eYou have reset&a %argument 2%&e's balance!"
+                        message "&6You have reset&c %argument 2%&6's balance!"
             else:
                 set {iMoney::users::%player's uuid%} to 0    
-                message "&eYou have reset your balance!"           
+                message "&6You have reset your balance!"           
 command /balance [<player>]:
     aliases: bal
     permission: iEssentials.balance
@@ -134,9 +65,9 @@ command /balance [<player>]:
     trigger:
         if argument 1 is set:
             player has permission "iEssentials.balance.others":
-                message "&eBalance of &a%arg 1%&e:&a %{iEssentials::eco:users::%arg 1's uuid%}%"
+                message "&6Balance of &a%arg 1%&e:&a %{iEssentials::eco:users::%arg 1's uuid%}%"
         else:
-            message "&eBalance: &a%{iEssentials::eco::users::%player's uuid%}%"
+            message "&6Balance: &a%{iEssentials::eco::users::%player's uuid%}%"
 
 command /pay <player> <number>:
     permission: iEssentials.pay
@@ -148,10 +79,10 @@ command /pay <player> <number>:
             if arg 2 is greater than 0:
                 remove arg 2 from {iEssentials::eco::users::%player's uuid%}
                 increase {iEssentials::eco::users::%arg 1's uuid%} by arg 2
-                message "&eYou have payed &a%argument 2% %argument 1%&e!"
-                send "&a%player% &ehas payed you &a%argument 2%&e!" to arg 1
+                message "&6You have payed &a%argument 2% %argument 1%&6!"
+                send "&a%player% &6has payed you &a%argument 2%&6!" to arg 1
             else:
-                message "&cYou cannot pay players &a%argument 2%&c!" 
+                message "&cYou cannot pay players &f%argument 2%&c!" 
 
 #iEssentials Cheat Commands
 
@@ -164,26 +95,26 @@ command /getpos [<player>]:
             if arg is online:
                 if player has permission "iEssentials.getpos.others":
                     set {iEssentials::getpos} to location of arg
-                    message "&a%argument% &eis at: &a%{iEssentials::getpos}%&e!"
+                    message "&6%argument% &eis at: &c%{iEssentials::getpos}%&6!"
                 else:
                     message "{@no-permission-message}"
         if arg isn't set: 
             set {iEssentials::getpos} to location of player
-            message "&eYou are at: &a%{iEssentials::getpos}%&e!"            
+            message "&6You are at: &c%{iEssentials::getpos}%&6!"            
 command /tp <player>:
     permission: iEssentials.tp
     permission message: {@no-permission-message}
     trigger:
         set {iEssentials::tp} to location of argument
         teleport player to {iEssentials::tp}
-        message "&eYou have teleported to &a%argument%&e."
+        message "&6You have teleported to &c%argument%&6."
 command /tphere <player>:
     permission: iEssentials.tphere
     permission message: {@no-permission-message}
     trigger:
         set {iEssentials::tphere} to location of player
         teleport argument to {iEssentials::tphere}
-        message "&eYou have teleported &a%argument% &eto yourself."
+        message "&6You have teleported &c%argument% &6to yourself."
 command /tpall:
     permission: iEssentials.tpall
     permission message: {@no-permission-message}
@@ -192,7 +123,7 @@ command /tpall:
             add loop-player to {iEssentials::player-list}
             set {iEssentials::tpall} to location of player
             teleport loop-player to {iEssentials::tpall}
-            message "&eYou have teleported everyone online to yourself."
+            message "&6You have teleported everyone online to yourself."
 command /god [<player>]:
     permission: iEssentials.god
     permission message: {@no-permission-message}
@@ -200,18 +131,18 @@ command /god [<player>]:
         if argument isn't set:
             if {iEssentials::god::%player's uuid%} is true:
                 set {iEssentials::god::%player's uuid%} to false
-                message "&eYou are no longer in god mode!"
+                message "&6You are no longer in god mode!"
             else:
                 set {iEssentials::god::%player's uuid%} to true
-                message "&eYou are now in god mode!"
+                message "&6You are now in god mode!"
         if argument is set:
             if player has permission "iEssentials.god.others":
                 if {iEssentials::god::%argument's uuid%} is true:
                     set {iEssentials::god::%argument's uuid%} to false
-                    send "&eYou are no longer in god mode!" to argument
+                    send "&6You are no longer in god mode!" to argument
                 else:
                     set {iEssentials::god::%argument's uuid%} to true
-                    send "&eYou are now in god mode!" to argument
+                    send "&6You are now in god mode!" to argument
 command /heal [<player>]:
     permission: iEssentials.heal
     permission message: {@no-permission-message}
@@ -244,37 +175,37 @@ command /feed [<player>]:
     trigger:
         if arg isn't set:
             set player's hunger to 20
-            message "&eYou have been fed!"
+            message "&6You have been fed!"
         if arg is set:
             if player has permission "iEssentials.feed.others":
                 set arg's hunger to 20
-                send "&eYou have been fed!" to arg
+                send "&6You have been fed!" to arg
             else:
                 message "{@no-permission-message}"
 command /vanish [<player>]:
     aliases: v
-    permission: iEssentials.vabusg
+    permission: iEssentials.vanish
     permission message: {@no-permission-message}    
     trigger:
         if argument isn't set:
             if {iCheats::vanish::%player's uuid%} is true:
                 set {iCheats::vanish::%player's uuid%} to false
                 reveal the player from all players
-                message "&eYou are no longer vanished!"
+                message "&6You are no longer vanished!"
             else:
                 set {iCheats::vanish::%player's uuid%} to true
                 hide the player from all players
-                message "&eYou have been vanished!"
+                message "&6You have been vanished!"
         if argument is set:
             if player has permission "iEssentials.vanish.others":
                 if {iCheats::vanish::%argument's uuid%} is true:
                     set {iEssentials::vanish::%argument's uuid%} to false
                     reveal the argument from all players
-                    send "&eYou are no longer vanished!" to argument
+                    send "&6You are no longer vanished!" to argument
                 else:
                     set {iEssentials::vanish::%argument's uuid%} to true
                     hide the argument from all players
-                    send "&eYou are now vanished!" to argument
+                    send "&6You are now vanished!" to argument
             else:
                 message "{@no-permission-message}"
 
@@ -292,29 +223,29 @@ command /mute <player>:
     trigger:
         if {iEssentials::mute::%argument's uuid%} is true:
             set {iEssentials::mute::%argument's uuid%} to false
-            message "&a%argument% &ehas been unmuted!"
-            send "&eYou have been unmuted!" to argument
+            message "&6%argument% &ehas been unmuted!"
+            send "&6You have been unmuted!" to argument
         else:
             set {iEssentials::mute::%argument's uuid%} to true
-            message "&a%argument% &ehas been muted!"
-            send "&eYou have been muted!" to argument
+            message "&6%argument% &ehas been muted!"
+            send "&6You have been muted!" to argument
 command /freeze <player>:
     permission: iEssentials.freeze
     permission message: {@no-permission-message}
     trigger:
         if {iEssentials::freeze::%argument's uuid%} is false:
             set {iEssentials::freeze::%argument's uuid%} to true
-            message "&eYou have froze &a%argument%&e!"
-            send "&eYou are now frozen!" to argument
+            message "&6You have froze &a%argument%&e!"
+            send "&6You are now frozen!" to argument
         else:
             set {iEssentials::freeze::%argument's uuid%} to false
-            message "&eYou have unfroze &a%argument%&e!"
-            send "&eYou are no longer frozen!" to argument      
+            message "&6You have unfroze &a%argument%&e!"
+            send "&6You are no longer frozen!" to argument      
 command /kick <player>:
     permission: iModerate.kick
     permission message: {@no-permission-message}
     trigger:
-        kick arg 1 due to "&c&lKicked! &eReason: &f%argument% &eBy:&f %player%"
+        kick arg 1 due to "&c&lKicked! &6By: &f %player%"
 command /unban <offlineplayer>:
     aliases: pardon
     permission: iModerate.unban
@@ -328,7 +259,10 @@ command /broadcast <text>:
     permission message: {@no-permission-message}
     trigger:
         if arg 1 is set:
-            broadcast "&8[&cBroadcast&8] &f%argument%"
+            if player has permission "iEssentials.broadcast.color":
+                broadcast "&8[&cBroadcast&8] &f%colored argument%"
+            else:
+                broadcast "&8[&cBroadcast&8] &f%uncolored argument%"
 command /gamemode <text> [<player>]:
     aliases: gm
     permission: iEssentials.gamemode
@@ -338,47 +272,47 @@ command /gamemode <text> [<player>]:
             if argument 1 is "0" or "survival":
                 if player has permission "iEssentials.gamemode.survival":
                     set player's gamemode to survival
-                    message "&eYou are now in &aSurvival &emode!"
+                    message "&6You are now in &cSurvival &6mode!"
             if argument 1 is "1" or "creative":
                 if player has permission "iEssentials.gamemode.creative":
                     set player's gamemode to creative
-                    message "&eYou are now in &aCreative &emode!"
+                    message "&6You are now in &cCreative &6mode!"
             if argument 1 is "2" or "adventure":
                 if player has permission "iEssentials.gamemode.adventure":
                     set player's gamemode to adventure
-                    message "&eYou are now in &aAdventure &emode!"
+                    message "&6You are now in &cAdventure &6mode!"
             if argument 1 is "3" or "spectator":
                 if player has permission "iEssentials.gamemode.spectator":               
                     set player's gamemode to spectator
-                    message "&eYou are now in &aSpectator &emode!"
+                    message "&6You are now in &cSpectator &6mode!"
         if argument 2 is set:
             if argument 1 is "0" or "survival":
                 if player has permission "iEssentials.gamemode.survival.others":
                     set argument 2's gamemode to survival
-                    send "&eYou are now in &aSurvival &emode!" to arg 2
+                    send "&6You are now in &cSurvival &6mode!" to arg 2
             if argument 1 is "1" or "creative":
                 if player has permission "iEssentials.gamemode.creative.others":
                     set argument 2's gamemode to creative
-                    send "&eYou are now in &aCreative &emode!" to arg 2
+                    send "&6You are now in &cCreative &6mode!" to arg 2
             if argument 1 is "2" or "adventure":
                 if player has permission "iEssentials.gamemode.adventure.others":
                     set argument 2's gamemode to adventure
-                    send "&eYou are now in &aSurvival &emode!" to arg 2
+                    send "&6You are now in &cSurvival &6mode!" to arg 2
             if argument 1 is "3" or "spectator":
                 if player has permission "iEssentials.gamemode.spectator.others":               
                     set argument 2's gamemode to spectator
-                    send "&eYou are now in &aSpectator &emode!" to arg 2
+                    send "&6You are now in &cSpectator &6mode!" to arg 2
 command /gms [<player>]:
     permission: iEssentials.gamemode.survival
     permission message: {@no-permission-message}
     trigger:
         if argument isn't set:
             set player's gamemode to survival
-            message "&eYou are now in &aSurvival &emode!"   
+            message "&6You are now in &cSurvival &6mode!"   
         if argument is set:  
             if player has permission "iEssentials.gamemode.survival.others": 
                 set argument's gamemode to survival
-                send "&eYou are now in &aSurvival &emode!" to arg 1
+                send "&6You are now in &cSurvival &6mode!" to arg 1
             else: 
                 message "{@no-permission-message}"   
 command /gmc [<player>]:
@@ -391,7 +325,7 @@ command /gmc [<player>]:
         if argument is set:  
             if player has permission "iEssentials.gamemode.creative.others": 
                 set argument's gamemode to creative
-                send "&eYou are now in &aCreative &emode!" to arg
+                send "&6You are now in &cCreative &6mode!" to arg
             else: 
                 message "{@no-permission-message}"   
 command /gma [<player>]:
@@ -400,11 +334,11 @@ command /gma [<player>]:
     trigger:
         if argument isn't set:
             set player's gamemode to adventure
-            message "&eYou are now in &aAdventure &emode!"  
+            message "&6You are now in &cAdventure &6mode!"  
         if argument is set:  
             if player has permission "iEssentials.gamemode.adventure.others": 
                 set argument's gamemode to adventure
-                send "&eYou are now in &aAdventure &emode!" to arg 1
+                send "&6You are now in &cAdventure &6mode!" to arg 1
             else: 
                 message "{@no-permission-message}"   
 command /gmsp [<player>]:
@@ -413,11 +347,11 @@ command /gmsp [<player>]:
     trigger:
         if argument isn't set:
             set player's gamemode to spectator
-            message "&eYou are now in &aSpectator &emode!"  
+            message "&6You are now in &cSpectator &6mode!"  
         if argument is set:  
             if player has permission "iEssentials.gamemode.spectator.others": 
                 set argument's gamemode to spectator
-                send "&eYou are now in &aSpectator &emode!" to arg 1
+                send "&6You are now in &cSpectator &6mode!" to arg 1
             else: 
                 message "{@no-permission-message}"  
 command /skull <offlineplayer>:
@@ -425,7 +359,7 @@ command /skull <offlineplayer>:
     permission message: {@no-permission-message}
     trigger:
         give player skull of argument        
-        message "&eYou have been given the skull of &a%player%&e!"
+        message "&6You have been given the skull of &c%player%&e!"
 on script load:
     if {iEssentials::blocked-words::*} isn't set:
         add "fuck" to {iEssentials::blocked-words::*}
@@ -488,26 +422,26 @@ command /block-word <text>:
     trigger:
         if argument is "list":
             if player has permission "iEssentials.block-word.list":
-                message "&e&lBlocked Words&f: %{iEssentials::blocked-words::*}%"
+                message "&6&lBlocked Words&f: %{iEssentials::blocked-words::*}%"
             else:
                 message "{@no-permission-message}"
         else:
             if argument is set:   
                 add argument to {iEssentials::blocked-words::*}
-                message "&eYou have blocked the word &a%argument%&e."
+                message "&6You have blocked the word &a%argument%&e."
 command /unblock-word <text>:
     permission: iEssentials.unblock-word
     permission message: @{no-permission-message}
     trigger:
         remove argument from {iEssentials::blocked-words::*}
-        message "&eYou have removed &a%argument% &efrom the swear word filter!"
+        message "&6You have removed &c%argument% &efrom the swear word filter!"
 command /clearchat:
     permission: iEssentials.clearchat
     permission message: {@no-permission-message}
     trigger:
         loop 200 times:
             broadcast "&f   "
-        broadcast "&e&lChat Cleared by &a%player%&e&l."
+        broadcast "&6&lChat Cleared by &c%player%&e&l."
 command /mutechat: 
     permission: iEssentials.mutechat
     permission message: {@no-permission-message}
@@ -537,6 +471,51 @@ command /unbanip <text>:
         if {iEssentials::bannedips::%argument%} is true:
             set {iEssentials::bannedips::%argument%} to false        
             message "&6This IP has been unbanned!"
+command /commandspy:
+    permission: iEssentials.commandspy
+    permission message: {@no-permission-message}
+    trigger:
+        if {iEssentials::commandspy::%player's uuid%} is true:
+            set {iEssentials::commandspy::%player's uuid%} to false
+            message "&6You have disabled command spy!"
+        else:
+            set {iEssentials::commandspy::%player's uuid%} to true
+            message "&6You have enabled command spy!"
+command /day:    
+    permission: iEssentials.day
+    permission message: {@no-permission-message}
+    trigger:
+        make console execute command "gamerule sendCommandFeedback false"
+        make console execute command "time set 5000"
+        message "&6You have set the time to day!"
+command /night:
+    permission: iEssentials.night
+    permission message: {@no-permission-message}
+    trigger:
+        make console execute command "gamerule sendCommandFeedback false"
+        make console execute command "time set 15000"
+        message "&6You have set the time to night!"
+command /sun:
+    permission: iEssentials.sun
+    permission message: {@no-permission-message}
+    trigger:
+        make console execute command "gamerule sendCommandFeedback false"
+        make console execute command "weather clear 600"
+        message "&6You have set the weather to sun!"
+command /rain:
+    permission: iEssentials.rain
+    permission message: {@no-permission-message}
+    trigger:
+        make console execute command "gamerule sendCommandFeedback false"
+        make console execute command "weather rain 600"
+        message "&6You have set the weather to rain!"
+command /thunder:
+    permission: iEssentials.thunder
+    permission message: {@no-permission-message}
+    trigger:
+        make console execute command "gamerule sendCommandFeedback false"
+        make console execute command "weather thunder 600"
+        message "&6You have set the weather to thunder!"
 
 #iEssentials Basic Player Commands
 
@@ -546,23 +525,13 @@ command /msg <player> <text>:
     permission: iBasics.msg
     permission message: {@no-permission-message}
     trigger:
-        send "&e%player% has sent you:&b %argument 2%" to player
-        set {iEssentials::reply::%argument 1%} to player
-        wait 90 seconds
-        clear {iEssentials::reply::%argument 1%}
-command /reply <text>:
-    usage: /reply <message>
-    aliases: r
-    permission: iBasics.reply
-    permission message: {no-permission-message}
-    trigger:
-        if {iEssentials::reply::%player%} isn't online:
-            message "&eYou have nothing to reply too!"
-        if {iEssentials::reply::%player%} is online:
-            send "&e%player% has sent you: &b%argument%" to {iBasics::Reply::%player%}
-            set {iEssentials::reply::%{iBasics::Reply::%player%}%} to player
+        if player has permission "iEssentials.msg.color":
+            send "&6[&7%player%&6 -> me]&f %colored argument 2%" to player
+            set {iEssentials::reply::%argument 1%} to player
             wait 90 seconds
-            clear {iEssentials::reply::%{iBasics::Reply::%player%}%}
+            clear {iEssentials::reply::%argument 1%}
+        else:
+            send "&6[&7%player% &6-> me]&f %uncolored argument 2%" to player
 command /helpop <text>:
     permission: iEssentials.helpop
     permission message: {@no-permission-message}
@@ -596,7 +565,7 @@ command /setwarp <text>:
     trigger:
         set {iEssentials::warp::%argument%} to location of player
         set {iEssentials::warpn::%argument%} to argument
-        message "&eWarp Created!"
+        message "&6Warp Created!"
 command /delwarp <text>:
     permission: iEssentials.setwarp
     permission message: {@no-permission-message}
@@ -604,12 +573,12 @@ command /delwarp <text>:
         if {iEssentials::warpn::%argument%} is set:
             clear {iEssentials::warp::%argument%}
             clear {iEssentials::warpn::%argument%}
-            message "&eWarp Deleted!"
+            message "&6Warp Deleted!"
 command /warps:
     permission: iEssentials.warps
     permission message: {@no-permission-message}
     trigger:
-        message "&5&lWarps&f: %{iEssentials::warpn::*}%"
+        message "&6&lWarps&f: %{iEssentials::warpn::*}%"
 command /mail [<text>] [<player>] [<text>]:
     permission: iEssentials.mail
     permission message: {@no-permission-message}
@@ -627,11 +596,18 @@ command /mail [<text>] [<player>] [<text>]:
             if arg 2 is set:
                 if arg 3 is set:
                     if player has permission "iEssentials.mail.send":
-                        if {iEssentials::mailtoggle::%argument 2's uuid%} is false:
-                            add "&f[%player%] %argument 3%" to {iEssentials::mail::%argument 2's uuid%::*}
-                            message "&6You have sent &f%argument 3% &6to &f%argument 2%&6's mailbox!"
-                        else:                        
-                            message "&6This player has mail disabled, meaning you cannot send them mail!"
+                        if player has permission "iEssentials.mail.color":
+                            if {iEssentials::mailtoggle::%argument 2's uuid%} is false:
+                                add "&f[%player%] %argument 3%" to {iEssentials::mail::%argument 2's uuid%::*}
+                                message "&6You have sent &f%colored argument 3% &6to &f%argument 2%&6's mailbox!"
+                            else:                        
+                                message "&6This player has mail disabled, meaning you cannot send them mail!"
+                        else:
+                            if {iEssentials::mailtoggle::%argument 2's uuid%} is false:
+                                add "&f[%player%] %argument 3%" to {iEssentials::mail::%argument 2's uuid%::*}
+                                message "&6You have sent &f%argument 3% &6to &f%argument 2%&6's mailbox!"
+                            else:                        
+                                message "&6This player has mail disabled, meaning you cannot send them mail!"
 command /mailtoggle:
     permission: iEssentials.mailtoggle
     permission message: {@no-permission-message}
@@ -642,16 +618,48 @@ command /mailtoggle:
         else:
             set {iEssentials::mailtoggle::%player's uuid%} to true
             message "&6You have disabled mail! Players cannot send you mail now!"
-command /commandspy:
-    permission: iEssentials.commandspy
+command /nick <text>: 
+    permission: iEssentials.nick
     permission message: {@no-permission-message}
     trigger:
-        if {iEssentials::commandspy::%player's uuid%} is true:
-            set {iEssentials::commandspy::%player's uuid%} to false
-            message "&6You have disabled command spy!"
+        if argument is set:
+            if length of argument is less than {@nickname-max-length}:
+                set {iEssentials::nickname::%player's uuid%} to colored argument
+                set player's nickname to {iEssentials::nickname::%player's uuid%}
+                message "&6Your nickname is now: %player's nickname%"
+            else:
+                message "&cYour nickname is too long!"
+        if argument isn't set:
+            message "&cPlease specify a nickname!"
+command /ignore [<player>]:
+    permission: iEssentials.ignore
+    permission message: {@no-permission-message}
+    trigger:
+        if arg is set:
+            if arg isn't player:
+                if {iEssentials::ignored::%player's uuid%::%argument's uuid%} is false:
+                    set {iEssentials::ignored::%player's uuid%::%argument's uuid%} to true
+                    message "&6You have ignored &f%argument%&6!"
+            
+                else:
+                    set {iEssentials::ignored::%player's uuid%::%argument's uuid%} to false
+                    message "&6You have unignored &c%argument%&6!"
+            else:
+                message "&cYou can't ignore yourself!"
         else:
-            set {iEssentials::commandspy::%player's uuid%} to true
-            message "&6You have enabled command spy!"
+            message "&cPlease specify who to ignore!"
+command /list:
+    permission: iEssentials.list
+    permission message: {@no-permission-message}
+    trigger:
+        clear {iEssentials::online::*}
+        set {iEssentials.online-amount} to 0
+        loop all players:
+            add player to {iEssentials::online::*}
+            increase {iEssentials.online-amount} by 1
+        message "&c&lPlayer List &f(%{iEssentials.online-amount}% players online)"
+        message "   "
+        message "&6Online Players&f: %{iEssentials::online::*}%"
 
 #iEssentials Spawn System
 
@@ -670,11 +678,11 @@ command /spawn:
             teleport player to {iSpawn::spawn}
         else:
             if player is op:
-                message "&eNo spawn! Please set the spawn with &f/setspawn&e!"
+                message "&6No spawn! Please set the spawn with &c/setspawn&e!"
             else if player has permission "iEssentials.setspawn":
-                message "&eNo spawn! Please set the spawn with &f/setspawn&e!"            
+                message "&6No spawn! Please set the spawn with &c/setspawn&e!"            
             else:
-                message "&ePlease tell an administrator to set the spawn."
+                message "&6Please tell an administrator to set the spawn."
 
 #iEssentials Event Management
 
@@ -697,6 +705,11 @@ on chat:
         if player doesn't have permission "iModerate.bypass":
             cancel event
             message "&cSorry, chat is muted."
+    loop recipients:
+        if {iEssentials::ignored::%loop-player's uuid%::%player's uuid%} is true:
+            remove loop-player from recipients
+    if player has permission "iEssentials.chat.color":
+        set message to colored message
 on any movement:
     if {iEssentials::afk::%player's uuid%} is true:     
         set {iEssentials::afk::%player's uuid%} to false
@@ -719,7 +732,10 @@ on first join:
         broadcast "{@first-join-message}" 
 on join:
     if {iEssentials::eco::users::%player's uuid%} isn't set:
-        set {iEssentials::eco::users::%player's uuid%} to {@starting-balance}   
+        set {iEssentials::eco::users::%player's uuid%} to {@starting-balance}
+    delete player's nickname   
+    if {iEssentials::nickname::%player's uuid%} is set:
+        set player's nickname to {iEssentials::nickname::%player's uuid%}
 on command:
     loop all players:
         if {iEssentials::commandspy::%loop-player's uuid%} is true:
