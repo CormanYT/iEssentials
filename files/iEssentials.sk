@@ -2,7 +2,7 @@
 
 options:
   no-permission-message : &cYou do not have permission for this command!
-  teleporation-message : &eTeleporting...
+  teleporation-message : &6Teleporting...
   first-join-message-toggled : true
   first-join-message : &dWelcome &6%player% &dto the server
   starting-balance : 0
@@ -123,7 +123,7 @@ command /tpall:
             add loop-player to {iEssentials::player-list}
             set {iEssentials::tpall} to location of player
             teleport loop-player to {iEssentials::tpall}
-            message "&6You have teleported everyone online to yourself."
+        message "&6You have teleported everyone online to yourself."
 command /god [<player>]:
     permission: iEssentials.god
     permission message: {@no-permission-message}
@@ -140,9 +140,11 @@ command /god [<player>]:
                 if {iEssentials::god::%argument's uuid%} is true:
                     set {iEssentials::god::%argument's uuid%} to false
                     send "&6You are no longer in god mode!" to argument
+                    message "&c%argument% &6is no longer in god mode!"
                 else:
                     set {iEssentials::god::%argument's uuid%} to true
                     send "&6You are now in god mode!" to argument
+                    message "&c%argument% &6is now in god mode!"
 command /heal [<player>]:
     permission: iEssentials.heal
     permission message: {@no-permission-message}
@@ -150,25 +152,34 @@ command /heal [<player>]:
         if argument is set:
             if player has permission "iEssentials.heal.others":
                 heal argument
-                send "&eYou have been healed!" to argument
+                set argument's hunger to 20
+                message "&6You have healed &c%argument%&6!"
+                send "&6You have been healed!" to argument
             else:
                 message "{@no-permission-message}"
         else:
             heal player
-            message "&eYou have been healed!"
+            set player's hunger to 20
+            message "&6You have been healed!"
 command /sudo <player> <text>:
     permission: iEssentials.sudo
     permission message: {@no-permission-message}
     trigger:
         make argument 1 execute command "%argument 2%"
         message "&6You have made &f%argument 1% &6do &f/%argument 2%&6!"
-command /clear:
+command /clear [<player>]:
     aliases: /ci
     permission: iEssentials.clear
     permission message: {@no-permission-message}
     trigger:
-        message "&6You have cleared your inventory!"
-        clear player's inventory
+        if argument is set:
+            if player has permission "iEssentials.clear.others":
+                message "&6You have &c%argument%&6's your inventory!"
+                send "&6Your inventory has been cleared!" to argument
+                clear argument's inventory
+        else:
+            message "&6You have cleared your inventory!"
+            clear player's inventory
 command /feed [<player>]:
     permission: iEssentials.feed
     permission message: {@no-permission-message}
@@ -180,6 +191,7 @@ command /feed [<player>]:
             if player has permission "iEssentials.feed.others":
                 set arg's hunger to 20
                 send "&6You have been fed!" to arg
+                message "&6You have fed &c%argument%&6!"
             else:
                 message "{@no-permission-message}"
 command /vanish [<player>]:
@@ -202,10 +214,12 @@ command /vanish [<player>]:
                     set {iEssentials::vanish::%argument's uuid%} to false
                     reveal the argument from all players
                     send "&6You are no longer vanished!" to argument
+                    message "&c%argument% &6is no longer vanished!" 
                 else:
                     set {iEssentials::vanish::%argument's uuid%} to true
                     hide the argument from all players
                     send "&6You are now vanished!" to argument
+                    message "&c%argument% &6is now vanished!" 
             else:
                 message "{@no-permission-message}"
 
@@ -290,18 +304,22 @@ command /gamemode <text> [<player>]:
                 if player has permission "iEssentials.gamemode.survival.others":
                     set argument 2's gamemode to survival
                     send "&6You are now in &cSurvival &6mode!" to arg 2
+                    message "&c%argument 2% &6is now in &cSurvival &6mode!"
             if argument 1 is "1" or "creative":
                 if player has permission "iEssentials.gamemode.creative.others":
                     set argument 2's gamemode to creative
                     send "&6You are now in &cCreative &6mode!" to arg 2
+                    message "&c%argument 2% &6is now in &cCreative &6mode!"
             if argument 1 is "2" or "adventure":
                 if player has permission "iEssentials.gamemode.adventure.others":
                     set argument 2's gamemode to adventure
-                    send "&6You are now in &cSurvival &6mode!" to arg 2
+                    send "&6You are now in &cAdventure &6mode!" to arg 2
+                    message "&c%argument 2% &6is now in &cAdventure &6mode!"
             if argument 1 is "3" or "spectator":
                 if player has permission "iEssentials.gamemode.spectator.others":               
                     set argument 2's gamemode to spectator
                     send "&6You are now in &cSpectator &6mode!" to arg 2
+                    message "&c%argument 2% &6is now in &cSpectator &6mode!"
 command /gms [<player>]:
     permission: iEssentials.gamemode.survival
     permission message: {@no-permission-message}
@@ -313,6 +331,7 @@ command /gms [<player>]:
             if player has permission "iEssentials.gamemode.survival.others": 
                 set argument's gamemode to survival
                 send "&6You are now in &cSurvival &6mode!" to arg 1
+                message "&c%argument% &6is now in &cSurvival &6mode!"
             else: 
                 message "{@no-permission-message}"   
 command /gmc [<player>]:
@@ -326,6 +345,7 @@ command /gmc [<player>]:
             if player has permission "iEssentials.gamemode.creative.others": 
                 set argument's gamemode to creative
                 send "&6You are now in &cCreative &6mode!" to arg
+                message "&c%argument% &6is now in &cCreative &6mode!"
             else: 
                 message "{@no-permission-message}"   
 command /gma [<player>]:
@@ -339,6 +359,7 @@ command /gma [<player>]:
             if player has permission "iEssentials.gamemode.adventure.others": 
                 set argument's gamemode to adventure
                 send "&6You are now in &cAdventure &6mode!" to arg 1
+                message "&c%argument% &6is now in &cAdventure &6mode!"
             else: 
                 message "{@no-permission-message}"   
 command /gmsp [<player>]:
@@ -352,6 +373,7 @@ command /gmsp [<player>]:
             if player has permission "iEssentials.gamemode.spectator.others": 
                 set argument's gamemode to spectator
                 send "&6You are now in &cSpectator &6mode!" to arg 1
+                message "&c%argument% &6is now in &cSpectator &6mode!"
             else: 
                 message "{@no-permission-message}"  
 command /skull <offlineplayer>:
@@ -416,25 +438,26 @@ on script load:
         add ".ms" to {iEssentials::anti-advert::*}
         add ".se" to {iEssentials::anti-advert::*}
         add ".biz" to {iEssentials::anti-advert::*}
-command /block-word <text>:
-    permission: iEssentials.block-word
+command /word [<text>] [<text>]:
+    permission: iEssentials.word
     permission message: {@no-permission-message}
     trigger:
-        if argument is "list":
-            if player has permission "iEssentials.block-word.list":
+        if argument 1 is "block":
+            if player has permission "iEssentials.word.block":
+                if argument 2 is set:   
+                    add argument 1 to {iEssentials::blocked-words::*}
+                    message "&6You have blocked the word &a%argument 2%&e."
+                else:
+                    message "&cPlease specify what word to block!"
+        else if argument 1 is "blocked":
+            if player has permission "iEssentials.word.blocked":
                 message "&6&lBlocked Words&f: %{iEssentials::blocked-words::*}%"
-            else:
-                message "{@no-permission-message}"
+        else if argument 1 is "unblock":
+            if player has permission "iEssentials.word.unblock":
+                remove argument 2 from {iEssentials::blocked-words::*}
+                message "&6You have removed &c%argument 2% &efrom the swear word filter!"
         else:
-            if argument is set:   
-                add argument to {iEssentials::blocked-words::*}
-                message "&6You have blocked the word &a%argument%&e."
-command /unblock-word <text>:
-    permission: iEssentials.unblock-word
-    permission message: @{no-permission-message}
-    trigger:
-        remove argument from {iEssentials::blocked-words::*}
-        message "&6You have removed &c%argument% &efrom the swear word filter!"
+            message "&cPlease use /word <block|blocked|unblock> [word]"
 command /clearchat:
     permission: iEssentials.clearchat
     permission message: {@no-permission-message}
@@ -547,18 +570,29 @@ command /afk:
         else:
             broadcast "&f%player% &7is now AFK."   
             set {iEssentials::afk::%player's uuid%} to true
-command /warp <text>:
+command /warp <text> [<player>]:
     permission: iEssentials.warp 
     permission message: {@no-permission-message} 
     trigger:
-        if {iEssentials::warp::%argument%} is set:
-            if player has permission "iEssentials.warp.%argument%":
-                teleport player to {iEssentials::warp::%argument%}
-                message "{@teleporation-message}"
+        if argument 2 is set:
+            if {iEssentials::warp::%argument 1%} is set:
+                if player has permission "iEssentials.warps.%argument 1%" and "iEssentials.warp.others":
+                    teleport argument 2 to {iEssentials::warp::%argument 1%}
+                    send "{@teleporation-message}" to argument 2
+                    message "{@teleporation-message} &c%argument 2%"
+                else:
+                    message "{@no-permission-message}"
             else:
-                message "{@no-permission-message}"
-        else:
-            message "&eThis warp does not exist!"
+                message "&eThis warp does not exist!"
+        else:  
+            if {iEssentials::warp::%argument 1%} is set:
+                if player has permission "iEssentials.warps.%argument 1%":
+                    teleport player to {iEssentials::warp::%argument 1%}
+                    message "{@teleporation-message}"
+                else:
+                    message "{@no-permission-message}"
+            else:
+                message "&eThis warp does not exist!"
 command /setwarp <text>:
     permission: iEssentials.setwarp
     permission message: {@no-permission-message}
@@ -670,19 +704,34 @@ command /setspawn:
     trigger: 
         set {iEssentials::spawn} to location of player
         message "&eSpawn Set!"
-command /spawn:
+command /spawn [<player>]:
     usage: /spawn
     trigger:
-        if {iSpawn::spawn} is set:
-            message "{@teleporation-message}"
-            teleport player to {iSpawn::spawn}
+        if argument is set:
+            if player has permission "iEssentials.spawn.others":
+                if {iSpawn::spawn} is set:
+                    message "{@teleporation-message} &c%argument%"
+                    send "{@teleporation-message}" to argument
+                    teleport argument to {iSpawn::spawn}
+                else:
+                    if player is op:
+                        message "&cNo spawn! Please set the spawn with &c/setspawn&e!"
+                    else if player has permission "iEssentials.setspawn":
+                        message "&cNo spawn! Please set the spawn with &c/setspawn&e!"            
+                    else:
+                        message "&cPlease tell an administrator to set the spawn."
         else:
-            if player is op:
-                message "&6No spawn! Please set the spawn with &c/setspawn&e!"
-            else if player has permission "iEssentials.setspawn":
-                message "&6No spawn! Please set the spawn with &c/setspawn&e!"            
+            if {iSpawn::spawn} is set:
+                message "{@teleporation-message}"
+                teleport player to {iSpawn::spawn}
             else:
-                message "&6Please tell an administrator to set the spawn."
+                if player is op:
+                    message "&cNo spawn! Please set the spawn with &c/setspawn&e!"
+                else if player has permission "iEssentials.setspawn":
+                    message "&cNo spawn! Please set the spawn with &c/setspawn&e!"            
+                else:
+                    message "&cPlease tell an administrator to set the spawn."
+
 
 #iEssentials Event Management
 
