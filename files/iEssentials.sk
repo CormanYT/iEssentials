@@ -1,19 +1,25 @@
-#Configuration
+#More Testing
 
-options:
-  no-permission-message : &cYou do not have permission for this command!
-  teleporation-message : &6Teleporting...
-  first-join-message-toggled : true
-  first-join-message : &dWelcome &6%player% &dto the server
-  starting-balance : 0
-  nickname-max-length : 30
-
-#Code (Editing may mess up the project, not considered)
-
-#iEssentials
+on script load:
+    load yaml "plugins/iEssentials/config.yml" as "config"
+    set the header of "config" to "|-------------|" and "| iEssentials |" and "|-------------|"
+    if yaml path "teleportation-message" in "config" doesn't have value:		
+        set yaml value "teleporation-message" from "config" to "&6Teleporting..."
+    if yaml path "starting-balance" in "config" doesn't have value:	
+        set yaml value "starting-balance" from "config" to 0
+    if yaml path "nickname-max-length" in "config" doesn't have value:	
+        set yaml value "nickname-max-length" from "config" to 45
+    if yaml path "currency-prefix" in "config" doesn't have value:	
+        set yaml value "currency-prefix" from "config" to "$"
+    set {iEssentials::config::teleporation-message} to yaml value "teleporation-message" from "config"
+    set {iEssentials::config::starting-balance} to yaml value "starting-balance" from "config"
+    set {iEssentials::config::nickname-max-length} to yaml value "nickname-max-length" from "config"
+    set {iEssentials::config::currency-prefix} to yaml value "currency-prefix" from "config"
+    save yaml "config"
+	
 command /iEssentials:
-    permission: iEssentials.help
-    permission message: {@no-permission-message}
+    permission: iEssentials.help 
+    permission message: &cYou do not have permission for this command!
     trigger:
         message "&8------------------- &6&liEssentials &8-------------------"
         message "&f   "
@@ -26,6 +32,8 @@ command /iEssentials:
 
 command /eco [<text>] [<player>] [<number>]:
     usage: /eco
+    permission: iEssentials.eco
+    permission message: &cYou do not have permission for this command!
     trigger:
         if arg 1 is "set":
             if argument 2 is set:
@@ -33,45 +41,50 @@ command /eco [<text>] [<player>] [<number>]:
                     if arg 3 is set:
                         player has permission "iEssentials.eco.set":
                             set {iEssentials::eco::users::%arg 2's uuid%} to arg 3
-                            message "&c%argument 2%&6's balance has been set to:&c %arg 3%"   
-                        player doesn't have permission "iMoney.set":
-                            message "{@no-permission-message}"         
+                            message "&c%argument 2%&6's balance has been set to:&a%{iEssentials::config::currency-prefix}%&c%arg 3%"   
+                        player doesn't have permission "iEssentials.eco.set":
+                            message "&cYou do not have permission for this command!"         
         if arg 1 is "give":
             if arg 2 is set:
                 if arg 2 isn't offline:
                     player has permission "iEssentials.eco.give":
                         increase {iEssentials::eco::users::%arg 2's uuid%} by arg 3
-                        message "&6You have given &c%argument 3% &6to &a%argument 2%&6's balance!"    
+                        message "&6You have given &a%{iEssentials::config::currency-prefix}%&c%argument 3% &6to &a%argument 2%&6's balance!"    
+                    else:
+                        message "&cYou do not have permission for this command!"
         if arg 1 is "take":
             if arg 2 is set:
                 if arg 2 isn't offline:
                     if arg 3 is set:
                         player has permission "iEssentials.eco.take":
                             remove argument 3 from {iEssentials::eco::users::%argument 2's uuid%}
-                            message "&6You have taken &c%argument 3% &6from &c%argument 2%&6's balance!"
+                            message "&6You have taken &a%{iEssentials::config::currency-prefix}%&c%argument 3% &6from &c%argument 2%&6's balance!"
+                        else:
+                            message "&cYou do not have permission for this command!"
         if arg 1 is "reset":
             if arg 2 is set:
                 if arg 2 isn't offline:
                     player has permission "iEssentials.eco.reset":
                         set {iEssentials::eco::users::%argument 2's uuid%} to 0
                         message "&6You have reset&c %argument 2%&6's balance!"
+                    else:
+                        message "&cYou do not have permission for this command!"
             else:
                 set {iMoney::users::%player's uuid%} to 0    
                 message "&6You have reset your balance!"           
 command /balance [<player>]:
     aliases: bal
     permission: iEssentials.balance
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument 1 is set:
             player has permission "iEssentials.balance.others":
-                message "&6Balance of &a%arg 1%&e:&a %{iEssentials::eco:users::%arg 1's uuid%}%"
+                message "&6Balance of &a%arg 1%&6: &a%{iEssentials::config::currency-prefix}%&c%{iEssentials::eco:users::%arg 1's uuid%}%"
         else:
-            message "&6Balance: &a%{iEssentials::eco::users::%player's uuid%}%"
-
+            message "&6Balance: &a%{iEssentials::config::currency-prefix}%&c%{iEssentials::eco::users::%player's uuid%}%"
 command /pay <player> <number>:
     permission: iEssentials.pay
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument 2 is greater than {iEssentials::eco::users::%player's uuid%}:
             message "&eYou do not have enough money to do this!"
@@ -80,7 +93,7 @@ command /pay <player> <number>:
                 remove arg 2 from {iEssentials::eco::users::%player's uuid%}
                 increase {iEssentials::eco::users::%arg 1's uuid%} by arg 2
                 message "&6You have payed &a%argument 2% %argument 1%&6!"
-                send "&a%player% &6has payed you &a%argument 2%&6!" to arg 1
+                send "&a%player% &6has payed you &a%{iEssentials::config::currency-prefix}%&c%argument 2%&6!" to arg 1
             else:
                 message "&cYou cannot pay players &f%argument 2%&c!" 
 
@@ -89,7 +102,7 @@ command /pay <player> <number>:
 command /getpos [<player>]:
     aliases: coords, pos
     permission: iEssentials.getpos
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if arg is set:
             if arg is online:
@@ -97,27 +110,27 @@ command /getpos [<player>]:
                     set {iEssentials::getpos} to location of arg
                     message "&6%argument% &eis at: &c%{iEssentials::getpos}%&6!"
                 else:
-                    message "{@no-permission-message}"
+                    message "&cYou do not have permission for this command!"
         if arg isn't set: 
             set {iEssentials::getpos} to location of player
             message "&6You are at: &c%{iEssentials::getpos}%&6!"            
 command /tp <player>:
     permission: iEssentials.tp
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         set {iEssentials::tp} to location of argument
         teleport player to {iEssentials::tp}
         message "&6You have teleported to &c%argument%&6."
 command /tphere <player>:
     permission: iEssentials.tphere
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         set {iEssentials::tphere} to location of player
         teleport argument to {iEssentials::tphere}
         message "&6You have teleported &c%argument% &6to yourself."
 command /tpall:
     permission: iEssentials.tpall
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         loop all players: 
             add loop-player to {iEssentials::player-list}
@@ -126,7 +139,7 @@ command /tpall:
         message "&6You have teleported everyone online to yourself."
 command /god [<player>]:
     permission: iEssentials.god
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument isn't set:
             if {iEssentials::god::%player's uuid%} is true:
@@ -145,9 +158,11 @@ command /god [<player>]:
                     set {iEssentials::god::%argument's uuid%} to true
                     send "&6You are now in god mode!" to argument
                     message "&c%argument% &6is now in god mode!"
+            else:
+                message "&cYou do not have permission for this command!"
 command /heal [<player>]:
     permission: iEssentials.heal
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument is set:
             if player has permission "iEssentials.heal.others":
@@ -156,21 +171,21 @@ command /heal [<player>]:
                 message "&6You have healed &c%argument%&6!"
                 send "&6You have been healed!" to argument
             else:
-                message "{@no-permission-message}"
+                message "&cYou do not have permission for this command!"
         else:
             heal player
             set player's hunger to 20
             message "&6You have been healed!"
 command /sudo <player> <text>:
     permission: iEssentials.sudo
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         make argument 1 execute command "%argument 2%"
         message "&6You have made &f%argument 1% &6do &f/%argument 2%&6!"
 command /clear [<player>]:
     aliases: /ci
     permission: iEssentials.clear
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument is set:
             if player has permission "iEssentials.clear.others":
@@ -182,7 +197,7 @@ command /clear [<player>]:
             clear player's inventory
 command /feed [<player>]:
     permission: iEssentials.feed
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if arg isn't set:
             set player's hunger to 20
@@ -193,24 +208,24 @@ command /feed [<player>]:
                 send "&6You have been fed!" to arg
                 message "&6You have fed &c%argument%&6!"
             else:
-                message "{@no-permission-message}"
+                message "&cYou do not have permission for this command!"
 command /vanish [<player>]:
     aliases: v
     permission: iEssentials.vanish
-    permission message: {@no-permission-message}    
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument isn't set:
-            if {iCheats::vanish::%player's uuid%} is true:
-                set {iCheats::vanish::%player's uuid%} to false
+            if {iEssentials::vanish::%player's uuid%} is true:
+                set {iEssentials::vanish::%player's uuid%} to false
                 reveal the player from all players
                 message "&6You are no longer vanished!"
             else:
-                set {iCheats::vanish::%player's uuid%} to true
+                set {iEssentials::vanish::%player's uuid%} to true
                 hide the player from all players
                 message "&6You have been vanished!"
         if argument is set:
             if player has permission "iEssentials.vanish.others":
-                if {iCheats::vanish::%argument's uuid%} is true:
+                if {iEssentials::vanish::%argument's uuid%} is true:
                     set {iEssentials::vanish::%argument's uuid%} to false
                     reveal the argument from all players
                     send "&6You are no longer vanished!" to argument
@@ -221,19 +236,19 @@ command /vanish [<player>]:
                     send "&6You are now vanished!" to argument
                     message "&c%argument% &6is now vanished!" 
             else:
-                message "{@no-permission-message}"
+                message "&cYou do not have permission for this command!"
 
 #iEssentials Administration / Moderation
 
 command /ban <offlineplayer>:
     permission: iEssentials.ban
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         kick arg 1 due to "&c&lBanned!"
         set {iEssentials::banned::%argument's uuid%} to true
 command /mute <player>:
     permission: iEssentials.mute
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::mute::%argument's uuid%} is true:
             set {iEssentials::mute::%argument's uuid%} to false
@@ -245,7 +260,7 @@ command /mute <player>:
             send "&6You have been muted!" to argument
 command /freeze <player>:
     permission: iEssentials.freeze
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::freeze::%argument's uuid%} is false:
             set {iEssentials::freeze::%argument's uuid%} to true
@@ -257,20 +272,20 @@ command /freeze <player>:
             send "&6You are no longer frozen!" to argument      
 command /kick <player>:
     permission: iModerate.kick
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         kick arg 1 due to "&c&lKicked! &6By: &f %player%"
 command /unban <offlineplayer>:
     aliases: pardon
     permission: iModerate.unban
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::banned::%argument's uuid%} is true:    
             set {iEssentials::banned::%argument's uuid%} to false
 command /broadcast <text>:
     aliases: bc
     permission: iEssentials.broadcast
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if arg 1 is set:
             if player has permission "iEssentials.broadcast.color":
@@ -280,7 +295,7 @@ command /broadcast <text>:
 command /gamemode <text> [<player>]:
     aliases: gm
     permission: iEssentials.gamemode
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument 2 isn't set:
             if argument 1 is "0" or "survival":
@@ -322,7 +337,7 @@ command /gamemode <text> [<player>]:
                     message "&c%argument 2% &6is now in &cSpectator &6mode!"
 command /gms [<player>]:
     permission: iEssentials.gamemode.survival
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument isn't set:
             set player's gamemode to survival
@@ -333,10 +348,10 @@ command /gms [<player>]:
                 send "&6You are now in &cSurvival &6mode!" to arg 1
                 message "&c%argument% &6is now in &cSurvival &6mode!"
             else: 
-                message "{@no-permission-message}"   
+                message "&cYou do not have permission for this command!"   
 command /gmc [<player>]:
     permission: iEssentials.gamemode.creative
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument isn't set:
             set player's gamemode to creative
@@ -347,10 +362,10 @@ command /gmc [<player>]:
                 send "&6You are now in &cCreative &6mode!" to arg
                 message "&c%argument% &6is now in &cCreative &6mode!"
             else: 
-                message "{@no-permission-message}"   
+                message "&cYou do not have permission for this command!"   
 command /gma [<player>]:
     permission: iModerate.gamemode.adventure
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument isn't set:
             set player's gamemode to adventure
@@ -361,10 +376,10 @@ command /gma [<player>]:
                 send "&6You are now in &cAdventure &6mode!" to arg 1
                 message "&c%argument% &6is now in &cAdventure &6mode!"
             else: 
-                message "{@no-permission-message}"   
+                message "&cYou do not have permission for this command!"   
 command /gmsp [<player>]:
     permission: iEssentials.gamemode.spectator
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument isn't set:
             set player's gamemode to spectator
@@ -375,10 +390,10 @@ command /gmsp [<player>]:
                 send "&6You are now in &cSpectator &6mode!" to arg 1
                 message "&c%argument% &6is now in &cSpectator &6mode!"
             else: 
-                message "{@no-permission-message}"  
+                message "&cYou do not have permission for this command!"  
 command /skull <offlineplayer>:
     permission: iEssentials.skull
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         give player skull of argument        
         message "&6You have been given the skull of &c%player%&e!"
@@ -388,7 +403,7 @@ on script load:
         add "bitch" to {iEssentials::blocked-words::*}
         add "nigger" to {iEssentials::blocked-words::*}
         add "shit" to {iEssentials::blocked-words::*}
-        add "ass" to {iEssentials::blocked-words::*}
+        add "asshole" to {iEssentials::blocked-words::*}
         add "pussy" to {iEssentials::blocked-words::*}
         add "cock" to {iEssentials::blocked-words::*}
         add "dick" to {iEssentials::blocked-words::*}
@@ -440,7 +455,7 @@ on script load:
         add ".biz" to {iEssentials::anti-advert::*}
 command /word [<text>] [<text>]:
     permission: iEssentials.word
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument 1 is "block":
             if player has permission "iEssentials.word.block":
@@ -460,14 +475,14 @@ command /word [<text>] [<text>]:
             message "&cPlease use /word <block|blocked|unblock> [word]"
 command /clearchat:
     permission: iEssentials.clearchat
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         loop 200 times:
             broadcast "&f   "
         broadcast "&6&lChat Cleared by &c%player%&e&l."
 command /mutechat: 
     permission: iEssentials.mutechat
-    permission message: {@no-permission-message}
+    permission message: {iEssentials::config::no-permission-message}
     trigger:
         if {iEssentials::mutechat} is true:
             set {iEssentials::mutechat} to false
@@ -477,7 +492,7 @@ command /mutechat:
             broadcast "&6&lChat has been muted!"
 command /banip <offlineplayer>:
     permission: iEssentials.banip
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument is online:
             set {iEssentials::bannedips::%argument's ip%} to true
@@ -489,14 +504,14 @@ command /banip <offlineplayer>:
 command /unbanip <text>:
     aliases: pardonip
     permission: iEssentials.unbanip
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::bannedips::%argument%} is true:
             set {iEssentials::bannedips::%argument%} to false        
             message "&6This IP has been unbanned!"
 command /commandspy:
     permission: iEssentials.commandspy
-    permission message: {@no-permission-message}
+    permission message: {iEssentials::config::no-permission-message}
     trigger:
         if {iEssentials::commandspy::%player's uuid%} is true:
             set {iEssentials::commandspy::%player's uuid%} to false
@@ -506,35 +521,35 @@ command /commandspy:
             message "&6You have enabled command spy!"
 command /day:    
     permission: iEssentials.day
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         make console execute command "gamerule sendCommandFeedback false"
         make console execute command "time set 5000"
         message "&6You have set the time to day!"
 command /night:
     permission: iEssentials.night
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         make console execute command "gamerule sendCommandFeedback false"
         make console execute command "time set 15000"
         message "&6You have set the time to night!"
 command /sun:
     permission: iEssentials.sun
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         make console execute command "gamerule sendCommandFeedback false"
         make console execute command "weather clear 600"
         message "&6You have set the weather to sun!"
 command /rain:
     permission: iEssentials.rain
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         make console execute command "gamerule sendCommandFeedback false"
         make console execute command "weather rain 600"
         message "&6You have set the weather to rain!"
 command /thunder:
     permission: iEssentials.thunder
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         make console execute command "gamerule sendCommandFeedback false"
         make console execute command "weather thunder 600"
@@ -546,7 +561,7 @@ command /msg <player> <text>:
     usage: /msg <player> <message>
     aliases: pm, dm, m
     permission: iBasics.msg
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if player has permission "iEssentials.msg.color":
             send "&6[&7%player%&6 -> me]&f %colored argument 2%" to player
@@ -557,12 +572,12 @@ command /msg <player> <text>:
             send "&6[&7%player% &6-> me]&f %uncolored argument 2%" to player
 command /helpop <text>:
     permission: iEssentials.helpop
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         broadcast "&8[&cHelpOp&8] &7> &b%player% &fsays: %argument%"
 command /afk:
     permission: iEssentials.afk
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::afk::%player's uuid%} is true:
             set {iEssentials::afk::%player's uuid%} to false
@@ -572,37 +587,37 @@ command /afk:
             set {iEssentials::afk::%player's uuid%} to true
 command /warp <text> [<player>]:
     permission: iEssentials.warp 
-    permission message: {@no-permission-message} 
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument 2 is set:
             if {iEssentials::warp::%argument 1%} is set:
                 if player has permission "iEssentials.warps.%argument 1%" and "iEssentials.warp.others":
                     teleport argument 2 to {iEssentials::warp::%argument 1%}
-                    send "{@teleporation-message}" to argument 2
-                    message "{@teleporation-message} &c%argument 2%"
+                    send "{iEssentials::config::teleporation-message}" to argument 2
+                    message "%{iEssentials::config::teleporation-message}% &c%argument 2%"
                 else:
-                    message "{@no-permission-message}"
+                    message "&cYou do not have permission for this command!"
             else:
                 message "&eThis warp does not exist!"
         else:  
             if {iEssentials::warp::%argument 1%} is set:
                 if player has permission "iEssentials.warps.%argument 1%":
                     teleport player to {iEssentials::warp::%argument 1%}
-                    message "{@teleporation-message}"
+                    message "%{iEssentials::config::teleporation-message}%"
                 else:
-                    message "{@no-permission-message}"
+                    message "&cYou do not have permission for this command!"
             else:
                 message "&eThis warp does not exist!"
 command /setwarp <text>:
     permission: iEssentials.setwarp
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         set {iEssentials::warp::%argument%} to location of player
         set {iEssentials::warpn::%argument%} to argument
         message "&6Warp Created!"
 command /delwarp <text>:
-    permission: iEssentials.setwarp
-    permission message: {@no-permission-message}
+    permission: iEssentials.delwarp
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::warpn::%argument%} is set:
             clear {iEssentials::warp::%argument%}
@@ -610,22 +625,26 @@ command /delwarp <text>:
             message "&6Warp Deleted!"
 command /warps:
     permission: iEssentials.warps
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         message "&6&lWarps&f: %{iEssentials::warpn::*}%"
 command /mail [<text>] [<player>] [<text>]:
     permission: iEssentials.mail
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if arg 1 is "read":
             if player has permission "iBasics.mail.read":
                 message "&6&lYour mail:"
                 loop {iEssentials::mail::%player's uuid%::*}:
                     message "%loop-value%"
+            else:
+                message "&cYou do not have permission for this command!"
         if arg 1 is "clear":
             if player has permission "iEssentials.mail.clear":
                 clear {iEssentials::mail::%player's uuid%::*}
                 message "&6Your mail has been cleared!"
+            else:
+                message "&cYou do not have permission for this command!"
         if arg 1 is "send":
             if arg 2 is set:
                 if arg 3 is set:
@@ -642,9 +661,11 @@ command /mail [<text>] [<player>] [<text>]:
                                 message "&6You have sent &f%argument 3% &6to &f%argument 2%&6's mailbox!"
                             else:                        
                                 message "&6This player has mail disabled, meaning you cannot send them mail!"
+                    else:
+                        message "&cYou do not have permission for this command!"
 command /mailtoggle:
     permission: iEssentials.mailtoggle
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if {iEssentials::mailtoggle::%player's uuid%} is true:
             set {iEssentials::mailtoggle::%player's uuid%} to false
@@ -654,20 +675,20 @@ command /mailtoggle:
             message "&6You have disabled mail! Players cannot send you mail now!"
 command /nick <text>: 
     permission: iEssentials.nick
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if argument is set:
-            if length of argument is less than {@nickname-max-length}:
+            if length of argument is less than {iEssentials::config::nickname-max-length}:
                 set {iEssentials::nickname::%player's uuid%} to colored argument
                 set player's nickname to {iEssentials::nickname::%player's uuid%}
-                message "&6Your nickname is now: %player's nickname%"
+                message "&6Your nickname is now:&f %player's nickname%"
             else:
                 message "&cYour nickname is too long!"
         if argument isn't set:
             message "&cPlease specify a nickname!"
 command /ignore [<player>]:
     permission: iEssentials.ignore
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger:
         if arg is set:
             if arg isn't player:
@@ -681,26 +702,29 @@ command /ignore [<player>]:
             else:
                 message "&cYou can't ignore yourself!"
         else:
-            message "&cPlease specify who to ignore!"
+            message "&cPlease specify who to ignore or unignore!!"
 command /list:
     permission: iEssentials.list
-    permission message: {@no-permission-message}
+    permission message: {iEssentials::config::no-permission-message}
     trigger:
         clear {iEssentials::online::*}
         set {iEssentials.online-amount} to 0
         loop all players:
-            add player to {iEssentials::online::*}
+            add loop-player to {iEssentials::online::*}
             increase {iEssentials.online-amount} by 1
         message "&c&lPlayer List &f(%{iEssentials.online-amount}% players online)"
         message "   "
         message "&6Online Players&f: %{iEssentials::online::*}%"
+command /test:
+    trigger:
+        message "%{iEssentials::config::teleporation-message}%"
 
 #iEssentials Spawn System
 
 command /setspawn:
     usage: /setspawn
     permission: iEssentials.setspawn
-    permission message: {@no-permission-message}
+    permission message: &cYou do not have permission for this command!
     trigger: 
         set {iEssentials::spawn} to location of player
         message "&eSpawn Set!"
@@ -709,26 +733,26 @@ command /spawn [<player>]:
     trigger:
         if argument is set:
             if player has permission "iEssentials.spawn.others":
-                if {iSpawn::spawn} is set:
-                    message "{@teleporation-message} &c%argument%"
-                    send "{@teleporation-message}" to argument
-                    teleport argument to {iSpawn::spawn}
+                if {iEssentials::spawn} is set:
+                    message "{iEssentials::config::teleporation-message} &c%argument%"
+                    send "{iEssentials::config::teleporation-message}" to argument
+                    teleport argument to {iEssentials::spawn}
                 else:
                     if player is op:
-                        message "&cNo spawn! Please set the spawn with &c/setspawn&e!"
+                        message "&cNo spawn! Please set the spawn with &f/setspawn&c!"
                     else if player has permission "iEssentials.setspawn":
-                        message "&cNo spawn! Please set the spawn with &c/setspawn&e!"            
+                        message "&cNo spawn! Please set the spawn with &f/setspawn&c!"            
                     else:
                         message "&cPlease tell an administrator to set the spawn."
         else:
-            if {iSpawn::spawn} is set:
-                message "{@teleporation-message}"
-                teleport player to {iSpawn::spawn}
+            if {iEssentials::spawn} is set:
+                message "%{iEssentials::config::teleporation-message}%"
+                teleport player to {iEssentials::spawn}
             else:
                 if player is op:
-                    message "&cNo spawn! Please set the spawn with &c/setspawn&e!"
+                    message "&cNo spawn! Please set the spawn with &f/setspawn&c!"
                 else if player has permission "iEssentials.setspawn":
-                    message "&cNo spawn! Please set the spawn with &c/setspawn&e!"            
+                    message "&cNo spawn! Please set the spawn with &f/setspawn&c!"            
                 else:
                     message "&cPlease tell an administrator to set the spawn."
 
@@ -750,10 +774,6 @@ on chat:
         if message contains loop-value:
             cancel event
             message "&cPlease do not try to advertise!"
-    if {iEssentials::mutechat} is true:
-        if player doesn't have permission "iModerate.bypass":
-            cancel event
-            message "&cSorry, chat is muted."
     loop recipients:
         if {iEssentials::ignored::%loop-player's uuid%::%player's uuid%} is true:
             remove loop-player from recipients
@@ -776,12 +796,9 @@ on connect:
         kick player due to "&c&lBanned"
     if {iEssentials::bannedips::%player's ip%} is true:
         kick player due to "&c&lBanned"
-on first join:
-    if {@first-join-message-toggled} is true:
-        broadcast "{@first-join-message}" 
 on join:
     if {iEssentials::eco::users::%player's uuid%} isn't set:
-        set {iEssentials::eco::users::%player's uuid%} to {@starting-balance}
+        set {iEssentials::eco::users::%player's uuid%} to {iEssentials::config::starting-balance}
     delete player's nickname   
     if {iEssentials::nickname::%player's uuid%} is set:
         set player's nickname to {iEssentials::nickname::%player's uuid%}
