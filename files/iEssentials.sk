@@ -1,20 +1,41 @@
-#More Testing
-
 on script load:
     load yaml "plugins/iEssentials/config.yml" as "config"
     set the header of "config" to "|-------------|" and "| iEssentials |" and "|-------------|"
-    if yaml path "teleportation-message" in "config" doesn't have value:		
-        set yaml value "teleporation-message" from "config" to "&6Teleporting..."
+    if yaml path "currency-prefix" in "config" doesn't have value:	
+        set yaml value "currency-prefix" from "config" to "$"
     if yaml path "starting-balance" in "config" doesn't have value:	
         set yaml value "starting-balance" from "config" to 0
     if yaml path "nickname-max-length" in "config" doesn't have value:	
         set yaml value "nickname-max-length" from "config" to 45
-    if yaml path "currency-prefix" in "config" doesn't have value:	
-        set yaml value "currency-prefix" from "config" to "$"
-    set {iEssentials::config::teleporation-message} to yaml value "teleporation-message" from "config"
+    if yaml path "nickname-prefix" in "config" doesn't have value:
+        set yaml value "nickname-prefix" in "config" to "~"
+    if yaml path "god-on-disconnect" in "config" doesn't have value:
+        set yaml value "god-on-disconnect" in "config" to "true"
+    if yaml path "spawn-on-death" in "config" doesn't have value:
+        set yaml value "spawn-on-death" in "config" to "true"
+    if yaml path "spawn-on-join" in "config" doesn't have value:
+        set yaml value "spawn-on-join" in "config" to "true"
+    if yaml path "ops-name-color" in "config" doesn't have value:
+        set yaml value "ops-name-color" in "config" to "4"
+    if yaml path "gamemode-on-join" in "config" doesn't have value:
+        set yaml value "gamemode-on-join" in "config" to "false"
+    if yaml path "attack-join-delay" in "config" doesn't have value:
+        set yaml value "attack-join-delay" in "config" to "10"
+    if yaml path "sudo-disabled" in "config" doesn't have value:
+        set yaml value "sudo-disabled" in "config" to "false"
+    if yaml path "commandspy-disabled" in "config" doesn't have value:
+        set yaml value "commandspy-disabled" in "config" to "false"
     set {iEssentials::config::starting-balance} to yaml value "starting-balance" from "config"
     set {iEssentials::config::nickname-max-length} to yaml value "nickname-max-length" from "config"
     set {iEssentials::config::currency-prefix} to yaml value "currency-prefix" from "config"
+    set {iEssentials::config::nickname-prefix} to yaml value "nickname-prefix" from "config"
+    set {iEssentials::config::spawn-on-death} to yaml value "spawn-on-death" from "config"
+    set {iEssentials::config::spawn-on-join} to yaml value "spawn-on-join" from "config"
+    set {iEssentials::config::ops-name-color} to yaml value "ops-name-color" from "config"
+    set {iEssentials::config::gamemode-on-join} to yaml value "gamemode-on-join" from "config"
+    set {iEssentials::config::attack-join-delay} to yaml value "attack-join-delay" from "config"
+    set {iEssentials::config::sudo-disabled} to yaml value "sudo-disabled" from "config"
+    set {iEssentials::config::commandspy-disabled} to yaml value "commandspy-disabled" from "config"
     save yaml "config"
 	
 command /iEssentials:
@@ -26,7 +47,6 @@ command /iEssentials:
         message "&fWelcome to &6&liEssentials&f, a Skript server management system!"
         message "&fThis plugin is great if you are running a server with mainly Skript."
         message "&fAdministrate your server, use some nifty cheats too! Give player's money to their balance."
-        message "&fIf you need help with the commands do /iEssentials help. It's a list of iEssentials commands!"
 
 #iEssentials Economy
 
@@ -180,8 +200,11 @@ command /sudo <player> <text>:
     permission: iEssentials.sudo
     permission message: &cYou do not have permission for this command!
     trigger:
-        make argument 1 execute command "%argument 2%"
-        message "&6You have made &f%argument 1% &6do &f/%argument 2%&6!"
+        if {iEssentials::config::sudo-disabled} is false:
+            make argument 1 execute command "%argument 2%"
+            message "&6You have made &f%argument 1% &6do &f/%argument 2%&6!"
+        else:
+            message "&cSudo is disabled!"
 command /clear [<player>]:
     aliases: /ci
     permission: iEssentials.clear
@@ -391,12 +414,16 @@ command /gmsp [<player>]:
                 message "&c%argument% &6is now in &cSpectator &6mode!"
             else: 
                 message "&cYou do not have permission for this command!"  
-command /skull <offlineplayer>:
+command /skull [<offlineplayer>]:
     permission: iEssentials.skull
     permission message: &cYou do not have permission for this command!
     trigger:
-        give player skull of argument        
-        message "&6You have been given the skull of &c%player%&e!"
+        if argument is set:
+            give player skull of argument        
+            message "&6You have been given the skull of &c%argument%&e!"
+        else:
+            give player skull of player
+            message "&6You have been given the skull of yourself!"
 on script load:
     if {iEssentials::blocked-words::*} isn't set:
         add "fuck" to {iEssentials::blocked-words::*}
@@ -494,13 +521,14 @@ command /banip <offlineplayer>:
     permission: iEssentials.banip
     permission message: &cYou do not have permission for this command!
     trigger:
-        if argument is online:
+        if arg is online:
             set {iEssentials::bannedips::%argument's ip%} to true
+            set {iEssentials::banned-ips::%argument%} to argument's ip
             loop all players:
                 if loop-player's ip is {iEssentials::bannedips::*}:
                     kick loop-player due to "&c&lBanned!"
         else:
-            message "&cYou can only IP ban players who are online!"
+            set {iEssentials::bannedips::%argument%} to true
 command /unbanip <text>:
     aliases: pardonip
     permission: iEssentials.unbanip
@@ -509,16 +537,22 @@ command /unbanip <text>:
         if {iEssentials::bannedips::%argument%} is true:
             set {iEssentials::bannedips::%argument%} to false        
             message "&6This IP has been unbanned!"
+        else if {iEssentials::banned-ips::%argument%} is set:
+            set {iEssentials::bannedips::%{iEssentials::banned-ips::%argument%}%} to false
+            message "&6You have unbanned &c%argument%&6's ip!"
 command /commandspy:
     permission: iEssentials.commandspy
     permission message: {iEssentials::config::no-permission-message}
     trigger:
-        if {iEssentials::commandspy::%player's uuid%} is true:
-            set {iEssentials::commandspy::%player's uuid%} to false
-            message "&6You have disabled command spy!"
+        if {iEssentials::config::commandspy-disabled} is false:
+            if {iEssentials::commandspy::%player's uuid%} is true:
+                set {iEssentials::commandspy::%player's uuid%} to false
+                message "&6You have disabled command spy!"
+            else:
+                set {iEssentials::commandspy::%player's uuid%} to true
+                message "&6You have enabled command spy!"
         else:
-            set {iEssentials::commandspy::%player's uuid%} to true
-            message "&6You have enabled command spy!"
+            message "&cCommand Spy is disabled!"
 command /day:    
     permission: iEssentials.day
     permission message: &cYou do not have permission for this command!
@@ -594,7 +628,7 @@ command /warp <text> [<player>]:
                 if player has permission "iEssentials.warps.%argument 1%" and "iEssentials.warp.others":
                     teleport argument 2 to {iEssentials::warp::%argument 1%}
                     send "{iEssentials::config::teleporation-message}" to argument 2
-                    message "%{iEssentials::config::teleporation-message}% &c%argument 2%"
+                    message "&6Teleporting &c%argument 2%&6..."
                 else:
                     message "&cYou do not have permission for this command!"
             else:
@@ -603,7 +637,7 @@ command /warp <text> [<player>]:
             if {iEssentials::warp::%argument 1%} is set:
                 if player has permission "iEssentials.warps.%argument 1%":
                     teleport player to {iEssentials::warp::%argument 1%}
-                    message "%{iEssentials::config::teleporation-message}%"
+                    message "&6Teleporting..."
                 else:
                     message "&cYou do not have permission for this command!"
             else:
@@ -674,12 +708,13 @@ command /mailtoggle:
             set {iEssentials::mailtoggle::%player's uuid%} to true
             message "&6You have disabled mail! Players cannot send you mail now!"
 command /nick <text>: 
+    aliases: nickname
     permission: iEssentials.nick
     permission message: &cYou do not have permission for this command!
     trigger:
         if argument is set:
             if length of argument is less than {iEssentials::config::nickname-max-length}:
-                set {iEssentials::nickname::%player's uuid%} to colored argument
+                set {iEssentials::nickname::%player's uuid%} to "%{iEssentials::config::nickname-prefix}%%colored argument%"     
                 set player's nickname to {iEssentials::nickname::%player's uuid%}
                 message "&6Your nickname is now:&f %player's nickname%"
             else:
@@ -715,9 +750,6 @@ command /list:
         message "&c&lPlayer List &f(%{iEssentials.online-amount}% players online)"
         message "   "
         message "&6Online Players&f: %{iEssentials::online::*}%"
-command /test:
-    trigger:
-        message "%{iEssentials::config::teleporation-message}%"
 
 #iEssentials Spawn System
 
@@ -746,7 +778,7 @@ command /spawn [<player>]:
                         message "&cPlease tell an administrator to set the spawn."
         else:
             if {iEssentials::spawn} is set:
-                message "%{iEssentials::config::teleporation-message}%"
+                message "&6Teleporting..."
                 teleport player to {iEssentials::spawn}
             else:
                 if player is op:
@@ -797,11 +829,40 @@ on connect:
     if {iEssentials::bannedips::%player's ip%} is true:
         kick player due to "&c&lBanned"
 on join:
+    if {iEssentials::config::spawn-on-join} is true:
+        teleport player to {iEssentials::spawn}
     if {iEssentials::eco::users::%player's uuid%} isn't set:
         set {iEssentials::eco::users::%player's uuid%} to {iEssentials::config::starting-balance}
     delete player's nickname   
     if {iEssentials::nickname::%player's uuid%} is set:
         set player's nickname to {iEssentials::nickname::%player's uuid%}
+    else:
+        if player is op:
+            if {iEssentials::config::ops-name-color} isn't "none":
+                set {_op-name} to "&%{iEssentials::config::ops-name-color}%%player%"
+                set player's nickname to "%colored {_op-name}%"
+    if {iEssentials::config::gamemode-on-join} isn't false:
+        if {iEssentials::config::gamemode-on-join} is "0" parsed as a number or "survival":
+            set player's gamemode to survival
+        if {iEssentials::config::gamemode-on-join} is "1" parsed as a number or "survival":
+            set player's gamemode to creative	
+        if {iEssentials::config::gamemode-on-join} is "2" parsed as a number or "survival":
+            set player's gamemode to adventure	
+        if {iEssentials::config::gamemode-on-join} is "3" parsed as a number or "survival":
+            set player's gamemode to spectator	
+    if {iEssentials::config::attack-join-delay} isn't "false":
+        if {iEssentials::god::%player's uuid%} isn't "true":
+            set {iEssentials::god::%player's uuid%} to true
+            loop {iEssentials::config::attack-join-delay} times:
+                wait 1 seconds
+            set {iEssentials::god::%player's uuid%} to false
+    while player is online:
+        wait 1 seconds
+    if {iEssentials::config::god-on-disconnect} is false:
+        set {iEssentials::god::%player's uuid%} to false
+on death:
+    if {iEssentials::config::spawn-on-death} is true:
+        teleport player to {iEssentials::spawn}
 on command:
     loop all players:
         if {iEssentials::commandspy::%loop-player's uuid%} is true:
